@@ -97,18 +97,19 @@ def insert_flash(
     source_url: Optional[str] = None,
     subcategory: str = "",
     collected_at: Optional[str] = None,
+    lang: str = "zh",
 ) -> int:
     conn = get_conn()
     ts = now_cn()
     try:
         cur = conn.execute(
-            """INSERT INTO flash_news (title, content, category_id, importance, source, source_url, subcategory, collected_at, published_at, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (title, content, category_id, importance, source, source_url, subcategory, collected_at or ts, ts, ts),
+            """INSERT INTO flash_news (title, content, category_id, importance, source, source_url, subcategory, collected_at, published_at, created_at, lang)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (title, content, category_id, importance, source, source_url, subcategory, collected_at or ts, ts, ts, lang),
         )
         fid = cur.lastrowid
         conn.commit()
-        log.info(f"Flash inserted: id={fid}, title={title[:30]}")
+        log.info(f"Flash inserted: id={fid}, lang={lang}, title={title[:30]}")
         return fid
     except Exception as e:
         log.error(f"Flash insert failed: {e}")

@@ -19,6 +19,7 @@ except ImportError:
 
 from pipeline.config.settings import FLASH_CHANNELS
 from pipeline.utils.ws_flash_buffer import append_ws_item
+from pipeline.utils.database import insert_flash
 from pipeline.utils.logger import get_logger
 
 log = get_logger("finnhub_ws")
@@ -50,12 +51,29 @@ def _on_message(ws, message):
         title = (n.get("headline") or "").strip()
         if not title:
             continue
+        
+        content = (n.get("summary") or title)[:400]
+        source = f"Finnhub/{n.get('source', '')}"
+        source_url = n.get("url") or ""
+        
+        # 1. 直接插入实时数据库，供英文界面瞬间消费（语言设为 en）
+        insert_flash(
+            title=title,
+            content=content,
+            category_id=2,  # 默认 Crypto，或者其他逻辑分类
+            importance="normal",
+            source=source,
+            source_url=source_url,
+            lang="en"
+        )
+        
+        # 2. 写入 JSONL 缓冲序列，供 60 秒一次的 Pipeline 批量机翻成中文入库
         append_ws_item({
             "title": title,
-            "content": (n.get("summary") or title)[:400],
+            "content": content,
             "raw_text": f"{title} {n.get('summary', '')}",
-            "source": f"Finnhub-WS/{n.get('source', '')}",
-            "source_url": n.get("url") or "",
+            "source": source,
+            "source_url": source_url,
             "lang": "en",
             "channel": "finnhub_ws",
         })
