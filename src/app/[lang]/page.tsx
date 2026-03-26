@@ -1,3 +1,4 @@
+import { getDictionary } from '@/lib/dictionaries';
 import LocalizedLink from '@/components/LocalizedLink';
 import dynamic from 'next/dynamic';
 import {
@@ -36,7 +37,8 @@ const LiveTicker = dynamic(() => import('@/components/LiveTicker'), {
 
 export const revalidate = 15;
 
-export default function HomePage({ params: { lang } }: { params: { lang: string } }) {
+export default async function HomePage({ params: { lang } }: { params: { lang: string } }) {
+  const dict = await getDictionary(lang as any);
   const articles = getPublishedArticles(lang, 22);
   const flashStream = getFlashNews(lang, 12);
   const topics = getTopics(6);
@@ -87,7 +89,7 @@ export default function HomePage({ params: { lang } }: { params: { lang: string 
       <section className="border-b border-[#ddd5ca] bg-[#fbf8f4]">
         <div className="container-main py-4">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-            <span className="yn-meta">频道导航</span>
+            <span className="yn-meta">{dict.home.channelNav}</span>
             <LocalizedLink href="/news" className="font-label text-xs font-semibold uppercase tracking-[0.14em] text-[#1d5c4f] hover:text-[#143d33]">
               资讯总览
             </LocalizedLink>
@@ -131,10 +133,10 @@ export default function HomePage({ params: { lang } }: { params: { lang: string 
 
             <section>
               <SectionHeader
-                title="最新资讯"
+                title={dict.home.newestTitle}
                 emphasis="strong"
                 actionHref="/news"
-                actionLabel={`全部 · ${totalArticles}`}
+                actionLabel={`${dict.common.all} · ${totalArticles}`}
               />
               {listArticles.length > 0 ? (
                 <div className="space-y-3">
@@ -143,13 +145,13 @@ export default function HomePage({ params: { lang } }: { params: { lang: string 
                   ))}
                 </div>
               ) : (
-                <p className="py-10 text-center text-slate-500">暂无更多列表稿件</p>
+                <p className="py-10 text-center text-slate-500">{dict.common.noData}</p>
               )}
             </section>
 
             {moreArticles.length > 0 ? (
               <section>
-                <SectionHeader title="编辑继续关注" emphasis="default" />
+                <SectionHeader title={dict.home.editorsPicks} emphasis="default" />
                 <div className="grid gap-3 sm:grid-cols-2">
                   {moreArticles.map(a => (
                     <ArticleCard key={a.id} article={a} />
@@ -167,7 +169,7 @@ export default function HomePage({ params: { lang } }: { params: { lang: string 
 
           <aside className="space-y-5 lg:col-span-4 lg:space-y-6">
             {watchArticles.length > 0 ? (
-              <RightRailPanel title="市场观察" accent actionHref="/news" actionLabel="更多">
+              <RightRailPanel title={dict.home.marketWatch} accent actionHref="/news" actionLabel={dict.common.readMore}>
                 <ul className="divide-y divide-[#ece4d8]">
                   {watchArticles.map(item => (
                     <li key={item.id} className="py-3 first:pt-0">
@@ -188,7 +190,7 @@ export default function HomePage({ params: { lang } }: { params: { lang: string 
               </RightRailPanel>
             ) : null}
 
-            <RightRailPanel title="热门标签" accent actionHref="/search" actionLabel="搜索">
+            <RightRailPanel title={dict.home.popularTags} accent actionHref="/search" actionLabel={dict.common.search}>
               {popularTags.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {popularTags.map(tag => (
@@ -202,12 +204,12 @@ export default function HomePage({ params: { lang } }: { params: { lang: string 
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500">暂无标签数据</p>
+                <p className="text-sm text-slate-500">{dict.home.noTags}</p>
               )}
             </RightRailPanel>
 
             {topics.length > 1 ? (
-              <RightRailPanel title="更多专题" actionHref="/topics" actionLabel="全部">
+              <RightRailPanel title={dict.home.moreTopics} actionHref="/topics" actionLabel={dict.common.all}>
                 <ul className="divide-y divide-[#ece4d8]">
                   {topics.slice(1, 6).map(t => (
                     <li key={t.id}>
@@ -228,7 +230,7 @@ export default function HomePage({ params: { lang } }: { params: { lang: string 
 
             <CtaBanner />
 
-            <RightRailPanel title="新手指南" accent>
+            <RightRailPanel title={dict.home.guideTitle} accent>
               <p className="font-body leading-7 text-slate-600">
                 从零了解美股、港股、加密货币与衍生品基础；编辑向结构，非营销落地页。
               </p>

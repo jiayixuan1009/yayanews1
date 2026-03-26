@@ -1,3 +1,4 @@
+import { getDictionary } from '@/lib/dictionaries';
 import type { Metadata } from 'next';
 import LocalizedLink from '@/components/LocalizedLink';
 import Image from 'next/image';
@@ -44,7 +45,7 @@ export function generateStaticParams() {
 
 export const revalidate = 60;
 
-export default function CategoryPage({
+export default async function CategoryPage({
   params,
   searchParams,
 }: {
@@ -57,6 +58,7 @@ export default function CategoryPage({
   const depthFilter = searchParams.type || '';
   const articleType = depthFilter === 'deep' ? 'deep' : depthFilter === 'standard' ? 'standard' : undefined;
 
+  const dict = await getDictionary(params.lang as any);
   const articles = getPublishedArticles(params.lang, 36, 0, params.category, undefined, articleType);
   const categories = getCategoriesOrdered();
   const isDerivatives = params.category === 'derivatives';
@@ -117,7 +119,7 @@ export default function CategoryPage({
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px] xl:gap-12">
           <div className="min-w-0 space-y-10">
             {articles.length === 0 ? (
-              <p className="py-16 text-center text-[#667067]">该分类暂无资讯</p>
+              <p className="py-16 text-center text-[#667067]">{dict.news.noCategoryNews}</p>
             ) : (
               <>
                 <section className="grid gap-6 border-b border-[#ddd5ca] pb-10 lg:grid-cols-[minmax(0,1.25fr)_280px]">
@@ -180,7 +182,7 @@ export default function CategoryPage({
 
                 <section className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
                   <div>
-                    <SectionHeader title="Latest Reports" emphasis="default" className="mb-5" />
+                    <SectionHeader title={dict.home.newestTitle} emphasis="default" className="mb-5" />
                     <div className="space-y-4">
                       {feed.map(a => (
                         <ArticleCard key={a.id} article={a} />
@@ -219,7 +221,7 @@ export default function CategoryPage({
                       </div>
                     </RightRailPanel>
 
-                    <RightRailPanel title="Trending micro-topics">
+                    <RightRailPanel title={dict.news.popularTags}>
                       <div className="flex flex-wrap gap-2">
                         {popularTags.map(tag => (
                           <LocalizedLink
@@ -233,9 +235,9 @@ export default function CategoryPage({
                       </div>
                     </RightRailPanel>
 
-                    <RightRailPanel title="Wire notes" actionHref="/flash" actionLabel="7×24">
+                    <RightRailPanel title={dict.news.flashSnippets} actionHref="/flash" actionLabel="7×24">
                       {flashMini.length === 0 ? (
-                        <p className="yn-meta text-[#667067]">暂无快讯</p>
+                        <p className="yn-meta text-[#667067]">{dict.news.noFlash}</p>
                       ) : (
                         <ul className="space-y-3">
                           {flashMini.slice(0, 4).map(f => (
@@ -255,7 +257,7 @@ export default function CategoryPage({
 
           <aside className="hidden lg:block">
             <div className="sticky top-24 border-l border-[#ddd5ca] pl-6">
-              <p className="yn-meta mb-4">Channel index</p>
+              <p className="yn-meta mb-4">{dict.news.channelIndex}</p>
               <div className="space-y-3">
                 {categories.map((c, idx) => (
                   <LocalizedLink

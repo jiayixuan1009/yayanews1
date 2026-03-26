@@ -1,3 +1,4 @@
+import { getDictionary } from '@/lib/dictionaries';
 import type { Metadata } from 'next';
 import LocalizedLink from '@/components/LocalizedLink';
 import { notFound } from 'next/navigation';
@@ -26,15 +27,15 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
 
 export const revalidate = 120;
 
-export default function TagPage({ params }: { params: { slug: string; lang: string } }) {
+export default async function TagPage({ params }: { params: { slug: string; lang: string } }) {
   const tag = getTagBySlug(params.slug);
   if (!tag) notFound();
 
+  const dict = await getDictionary(params.lang as any);
   const articles = getPublishedArticlesByTagSlug(params.slug, 48, 0);
   const total = getArticleCountByTagSlug(params.slug);
   const popularTags = getPopularTags(12);
   const flashMini = getFlashNews(params.lang, 6);
-
   const featured = articles[0];
   const subFeatured = articles.slice(1, 3);
   const feed = articles.slice(3);
@@ -43,7 +44,7 @@ export default function TagPage({ params }: { params: { slug: string; lang: stri
     <div className="container-main py-6 sm:py-8">
       <ChannelHeader
         title={`#${tag.name}`}
-        description={`共 ${total} 篇相关资讯 · 站内结构化聚合（PRD /tag/[slug]）`}
+        description={dict.tag.totalCount.replace("{count}", total.toString())}
       />
 
       <p className="yn-meta mb-6 text-slate-500">
@@ -51,17 +52,17 @@ export default function TagPage({ params }: { params: { slug: string; lang: stri
           资讯首页
         </LocalizedLink>
         <span className="mx-2">/</span>
-        <span>标签</span>
+        <span>{dict.tag.tagTitle}</span>
       </p>
 
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-8">
           {articles.length === 0 ? (
-            <p className="py-16 text-center text-slate-500">该标签下暂无已发布稿件</p>
+            <p className="py-16 text-center text-slate-500">{dict.tag.noArticles}</p>
           ) : (
             <>
               <section className="mb-8 space-y-4">
-                <SectionHeader title="精选" emphasis="strong" />
+                <SectionHeader title={dict.tag.featured} emphasis="strong" />
                 {featured ? <ArticleCard article={featured} featured priority /> : null}
                 {subFeatured.length > 0 ? (
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -72,7 +73,7 @@ export default function TagPage({ params }: { params: { slug: string; lang: stri
                 ) : null}
               </section>
 
-              <SectionHeader title="更多相关" emphasis="default" />
+              <SectionHeader title={dict.tag.moreRelated} emphasis="default" />
               <div className="space-y-3">
                 {feed.map(a => (
                   <ArticleCard key={a.id} article={a} />
@@ -83,9 +84,9 @@ export default function TagPage({ params }: { params: { slug: string; lang: stri
         </div>
 
         <aside className="space-y-5 lg:col-span-4">
-          <RightRailPanel title="快讯摘录" actionHref="/flash" actionLabel="7×24">
+          <RightRailPanel title={dict.news.flashSnippets} actionHref="/flash" actionLabel="7×24">
             {flashMini.length === 0 ? (
-              <p className="yn-meta text-slate-500">暂无快讯</p>
+              <p className="yn-meta text-slate-500">{dict.news.noFlash}</p>
             ) : (
               <ul className="space-y-2.5">
                 {flashMini.map(f => (
@@ -98,7 +99,7 @@ export default function TagPage({ params }: { params: { slug: string; lang: stri
             )}
           </RightRailPanel>
 
-          <RightRailPanel title="热门标签" accent>
+          <RightRailPanel title={dict.news.popularTags} accent>
             <div className="flex flex-wrap gap-1.5">
               {popularTags.map(t => (
                 <LocalizedLink

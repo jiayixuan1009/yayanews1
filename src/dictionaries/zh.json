@@ -1,6 +1,7 @@
 {
   "nav": {
     "home": "首页",
+    "news": "资讯",
     "flash": "7×24快讯",
     "markets": "行情中心",
     "usStock": "美股",
@@ -14,9 +15,69 @@
     "flashTitle": "7×24 滚动快讯",
     "flashDesc": "全球金融市场实时动态",
     "moreFlash": "查看更多快讯",
-    "latestNews": "最新资讯与深度分析",
+    "latestNews": "最新资讯",
     "moreNews": "查看更多资讯",
-    "marketQuotes": "市场行情"
+    "marketQuotes": "市场行情",
+    "channelNav": "频道导航",
+    "newsOverview": "资讯总览",
+    "editorsPicks": "编辑继续关注",
+    "marketWatch": "市场观察",
+    "popularTags": "热门标签",
+    "moreTopics": "更多专题",
+    "noTags": "暂无标签数据",
+    "all": "全部",
+    "enterGuide": "进入指南 →",
+    "guideDesc": "从零了解美股、港股、加密货币与衍生品基础；编辑向结构，非营销落地页。",
+    "guideTitle": "新手指南",
+    "newestTitle": "最新资讯",
+    "moreList": "更多列表"
+  },
+  "news": {
+    "todayFocus": "今日焦点",
+    "newsList": "资讯列表",
+    "flashSnippets": "快讯摘录",
+    "noFlash": "暂无快讯",
+    "popularTags": "热门标签",
+    "featuredReport": "Featured report",
+    "deepDive": "Deep dive",
+    "briefing": "Briefing",
+    "loadMore": "Load more archive entries",
+    "channelIndex": "Channel index",
+    "noCategoryNews": "该分类暂无资讯"
+  },
+  "article": {
+    "deepDive": "深度稿",
+    "bullish": "偏多",
+    "bearish": "偏空",
+    "neutral": "中性",
+    "views": "阅读",
+    "keyTakeaways": "核心要点",
+    "imageSource": "图片来源：",
+    "imageDisclaimer": "配图仅作信息辅助展示",
+    "disclaimerTitle": "稿件说明",
+    "disclaimerSelf": "本文由 YayaNews 编辑整理发布，仅供信息参考，不构成投资建议。",
+    "disclaimerOther": "本文转载或整理自 ",
+    "disclaimerSuffix": "，仅供信息参考，不构成投资建议。",
+    "tagsTitle": "标签",
+    "continueReading": "继续阅读",
+    "prev": "上一篇",
+    "next": "下一篇",
+    "relatedReading": "同栏目延伸阅读",
+    "enterChannel": "进入频道",
+    "articleInfo": "文章信息",
+    "publishedAt": "发布时间",
+    "channel": "所属频道",
+    "viewCount": "阅读量",
+    "relatedTickers": "相关标的",
+    "infoSource": "信息来源",
+    "relatedRecommendations": "相关推荐"
+  },
+  "tag": {
+    "noArticles": "该标签下暂无已发布稿件",
+    "featured": "精选",
+    "moreRelated": "更多相关",
+    "tagTitle": "标签",
+    "totalCount": "共 {count} 篇相关资讯"
   },
   "footer": {
     "desc": "YayaNews 是领先的专业金融新闻资讯平台，为您提供全球财经动态、加密货币快讯、深度市场分析及投资指南。",
@@ -31,6 +92,10 @@
     "source": "来源",
     "noData": "暂无数据",
     "search": "搜索",
-    "searchPlaceholder": "搜索新闻、专题、标签..."
+    "searchPlaceholder": "搜索新闻、专题、标签...",
+    "all": "全部",
+    "prevPage": "← 上一页",
+    "nextPage": "下一页 →",
+    "pageIndicator": "第 {page} / {totalPages} 页"
   }
 }

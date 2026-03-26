@@ -1,3 +1,4 @@
+import { getDictionary } from '@/lib/dictionaries';
 import type { Metadata } from 'next';
 import LocalizedLink from '@/components/LocalizedLink';
 import Image from 'next/image';
@@ -47,14 +48,16 @@ function formatDate(value?: string | null) {
   return value?.slice(0, 16) ?? '';
 }
 
-function getSentimentLabel(sentiment?: string) {
-  if (sentiment === 'bullish') return { label: '偏多', cls: 'border-emerald-200 bg-emerald-50 text-emerald-700' };
-  if (sentiment === 'bearish') return { label: '偏空', cls: 'border-rose-200 bg-rose-50 text-rose-700' };
-  if (sentiment) return { label: '中性', cls: 'border-slate-200 bg-slate-100 text-slate-600' };
-  return null;
-}
+export default async function ArticlePage({ params }: { params: { slug: string; lang: string } }) {
+  const dict = await getDictionary(params.lang as any);
 
-export default function ArticlePage({ params }: { params: { slug: string; lang: string } }) {
+  function getSentimentLabel(sentiment?: string) {
+    if (sentiment === 'bullish') return { label: dict.article.bullish, cls: 'border-emerald-200 bg-emerald-50 text-emerald-700' };
+    if (sentiment === 'bearish') return { label: dict.article.bearish, cls: 'border-rose-200 bg-rose-50 text-rose-700' };
+    if (sentiment) return { label: dict.article.neutral, cls: 'border-slate-200 bg-slate-100 text-slate-600' };
+    return null;
+  }
+
   const article = getArticleBySlug(params.slug);
   if (!article) notFound();
 
@@ -106,7 +109,7 @@ export default function ArticlePage({ params }: { params: { slug: string; lang: 
                   <span className="badge border-[#cfe1d9] bg-[#eef6f3] text-[#1d5c4f]">{article.category_name}</span>
                 ) : null}
                 {article.article_type === 'deep' ? (
-                  <span className="badge border-violet-200 bg-violet-50 text-violet-700">深度稿</span>
+                  <span className="badge border-violet-200 bg-violet-50 text-violet-700">{dict.article.deepDive}</span>
                 ) : null}
                 {sentiment ? <span className={`badge ${sentiment.cls}`}>{sentiment.label}</span> : null}
                 {tickers.length > 0 ? (
@@ -160,7 +163,7 @@ export default function ArticlePage({ params }: { params: { slug: string; lang: 
             {article.key_points && article.key_points.trim() ? (
               <section className="yn-panel mt-6 p-5 sm:p-6">
                 <div className="yn-section-rule mb-4 flex items-center justify-between">
-                  <h2 className="yn-heading-sm">核心要点</h2>
+                  <h2 className="yn-heading-sm">{dict.article.keyTakeaways}</h2>
                   <span className="yn-meta">Key takeaways</span>
                 </div>
                 <ul className="space-y-3">
@@ -192,7 +195,7 @@ export default function ArticlePage({ params }: { params: { slug: string; lang: 
                   />
                 </div>
                 <figcaption className="px-4 py-3 text-xs uppercase tracking-[0.14em] text-slate-500">
-                  {article.source && article.source !== 'YayaNews' ? `图片来源：${article.source}` : '配图仅作信息辅助展示'}
+                  {article.source && article.source !== 'YayaNews' ? `${dict.article.imageSource} ${article.source}` : dict.article.imageDisclaimer}
                 </figcaption>
               </figure>
             ) : null}
@@ -206,7 +209,7 @@ export default function ArticlePage({ params }: { params: { slug: string; lang: 
               <div className="yn-panel-soft p-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                    <p className="yn-meta mb-2">稿件说明</p>
+                    <p className="yn-meta mb-2">{dict.article.disclaimerTitle}</p>
                     {article.source === 'YayaNews' || !article.source ? (
                       <p className="yn-body">本文由 {siteConfig.siteName} 编辑整理发布，仅供信息参考，不构成投资建议。</p>
                     ) : (
@@ -239,7 +242,7 @@ export default function ArticlePage({ params }: { params: { slug: string; lang: 
               {article.tags && article.tags.length > 0 ? (
                 <section>
                   <div className="yn-section-rule mb-3 flex items-center justify-between">
-                    <h2 className="yn-heading-sm">标签</h2>
+                    <h2 className="yn-heading-sm">{dict.article.tagsTitle}</h2>
                     <span className="yn-meta">Topics & symbols</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -259,13 +262,13 @@ export default function ArticlePage({ params }: { params: { slug: string; lang: 
               {(prev || next) && (
                 <section>
                   <div className="yn-section-rule mb-4 flex items-center justify-between">
-                    <h2 className="yn-heading-sm">继续阅读</h2>
+                    <h2 className="yn-heading-sm">{dict.article.continueReading}</h2>
                     <span className="yn-meta">Previous & next</span>
                   </div>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {prev ? (
                       <LocalizedLink href={`/article/${prev.slug}`} className="yn-panel group p-4 hover:border-[#bfb4a5]">
-                        <span className="yn-meta mb-2 block">上一篇</span>
+                        <span className="yn-meta mb-2 block">{dict.article.prev}</span>
                         <span className="block text-sm font-semibold leading-6 text-slate-800 group-hover:text-[#1d5c4f] line-clamp-2">
                           {prev.title}
                         </span>
@@ -275,7 +278,7 @@ export default function ArticlePage({ params }: { params: { slug: string; lang: 
                     )}
                     {next ? (
                       <LocalizedLink href={`/article/${next.slug}`} className="yn-panel group p-4 hover:border-[#bfb4a5] sm:text-right">
-                        <span className="yn-meta mb-2 block">下一篇</span>
+                        <span className="yn-meta mb-2 block">{dict.article.next}</span>
                         <span className="block text-sm font-semibold leading-6 text-slate-800 group-hover:text-[#1d5c4f] line-clamp-2">
                           {next.title}
                         </span>
@@ -289,7 +292,7 @@ export default function ArticlePage({ params }: { params: { slug: string; lang: 
 
               {moreRead.length > 0 ? (
                 <section className="border-t border-[#ddd5ca] pt-8">
-                  <SectionHeader title="同栏目延伸阅读" emphasis="strong" actionHref={`/news/${article.category_slug}`} actionLabel="进入频道" />
+                  <SectionHeader title={dict.article.relatedReading} emphasis="strong" actionHref={`/news/${article.category_slug}`} actionLabel={dict.article.enterChannel} />
                   <div className="mt-4 space-y-3">
                     {moreRead.map(a => (
                       <ArticleCard key={a.id} article={a} />
@@ -303,15 +306,15 @@ export default function ArticlePage({ params }: { params: { slug: string; lang: 
 
         <aside className="space-y-5 lg:col-span-4 lg:pl-2">
           <div className="lg:sticky lg:top-24 space-y-5">
-            <RightRailPanel title="文章信息" accent>
+            <RightRailPanel title={dict.article.articleInfo} accent>
               <dl className="space-y-3 text-sm">
                 <div className="flex items-start justify-between gap-4 border-b border-[#e5ddd2] pb-3">
-                  <dt className="yn-meta !text-[10px]">发布时间</dt>
+                  <dt className="yn-meta !text-[10px]">{dict.article.publishedAt}</dt>
                   <dd className="text-right text-slate-700">{formatDate(article.published_at)}</dd>
                 </div>
                 {article.category_name ? (
                   <div className="flex items-start justify-between gap-4 border-b border-[#e5ddd2] pb-3">
-                    <dt className="yn-meta !text-[10px]">所属频道</dt>
+                    <dt className="yn-meta !text-[10px]">{dict.article.channel}</dt>
                     <dd>
                       {article.category_slug ? (
                         <LocalizedLink href={`/news/${article.category_slug}`} className="yn-link text-right">
@@ -324,18 +327,18 @@ export default function ArticlePage({ params }: { params: { slug: string; lang: 
                   </div>
                 ) : null}
                 <div className="flex items-start justify-between gap-4 border-b border-[#e5ddd2] pb-3">
-                  <dt className="yn-meta !text-[10px]">阅读量</dt>
+                  <dt className="yn-meta !text-[10px]">{dict.article.viewCount}</dt>
                   <dd className="text-slate-700">{article.view_count}</dd>
                 </div>
                 {tickers.length > 0 ? (
                   <div className="flex items-start justify-between gap-4 border-b border-[#e5ddd2] pb-3">
-                    <dt className="yn-meta !text-[10px]">相关标的</dt>
+                    <dt className="yn-meta !text-[10px]">{dict.article.relatedTickers}</dt>
                     <dd className="text-right text-slate-700">{tickers.map(t => `$${t}`).join(' ')}</dd>
                   </div>
                 ) : null}
                 {article.source ? (
                   <div className="flex items-start justify-between gap-4">
-                    <dt className="yn-meta !text-[10px]">信息来源</dt>
+                    <dt className="yn-meta !text-[10px]">{dict.article.infoSource}</dt>
                     <dd className="text-right text-slate-700">
                       {article.source_url ? (
                         <a href={article.source_url} target="_blank" rel="noopener noreferrer nofollow" className="yn-link">
@@ -353,7 +356,7 @@ export default function ArticlePage({ params }: { params: { slug: string; lang: 
             <CtaBanner />
 
             {related.length > 0 ? (
-              <RightRailPanel title="相关推荐" accent>
+              <RightRailPanel title={dict.article.relatedRecommendations} accent>
                 <ul className="space-y-3">
                   {related.map(r => (
                     <li key={r.id} className="border-b border-[#e5ddd2] pb-3 last:border-b-0 last:pb-0">

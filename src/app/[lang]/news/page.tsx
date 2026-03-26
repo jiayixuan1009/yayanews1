@@ -1,3 +1,4 @@
+import { getDictionary } from '@/lib/dictionaries';
 import type { Metadata } from 'next';
 import LocalizedLink from '@/components/LocalizedLink';
 import {
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-export default function NewsPage({ 
+export default async function NewsPage({ 
   searchParams, 
   params 
 }: { 
@@ -35,6 +36,7 @@ export default function NewsPage({
 
   const pageSize = 20;
   const offset = (page - 1) * pageSize;
+  const dict = await getDictionary(params.lang as any);
   const articles = getPublishedArticles(params.lang, pageSize, offset, undefined, undefined, articleType);
   const total = getArticleCountByType(undefined, articleType);
   const totalPages = Math.ceil(total / pageSize);
@@ -83,13 +85,13 @@ export default function NewsPage({
       />
 
       {articles.length === 0 ? (
-        <p className="py-16 text-center text-slate-500">暂无资讯</p>
+        <p className="py-16 text-center text-slate-500">{dict.common.noData}</p>
       ) : (
         <div className="mt-6 grid gap-8 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-8">
             {page === 1 && !articleType ? (
               <section className="mb-8 space-y-4">
-                <SectionHeader title="今日焦点" emphasis="strong" />
+                <SectionHeader title={dict.news.todayFocus} emphasis="strong" />
                 {featured ? <ArticleCard article={featured} featured priority /> : null}
                 {subFeatured.length > 0 ? (
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -103,7 +105,7 @@ export default function NewsPage({
 
             {page === 1 && !articleType && feed.length > 0 ? (
               <>
-                <SectionHeader title="更多列表" emphasis="default" />
+                <SectionHeader title={dict.home.moreList} emphasis="default" />
                 <div className="space-y-3">
                   {feed.map(a => (
                     <ArticleCard key={a.id} article={a} />
@@ -114,7 +116,7 @@ export default function NewsPage({
 
             {(page > 1 || articleType) && articles.length > 0 ? (
               <>
-                <SectionHeader title="资讯列表" emphasis="default" />
+                <SectionHeader title={dict.news.newsList} emphasis="default" />
                 <div className="space-y-3">
                   {articles.map(a => (
                     <ArticleCard key={a.id} article={a} />
@@ -149,9 +151,9 @@ export default function NewsPage({
           </div>
 
           <aside className="space-y-5 lg:col-span-4">
-            <RightRailPanel title="快讯摘录" actionHref="/flash" actionLabel="7×24">
+            <RightRailPanel title={dict.news.flashSnippets} actionHref="/flash" actionLabel="7×24">
               {flashMini.length === 0 ? (
-                <p className="yn-meta text-slate-500">暂无快讯</p>
+                <p className="yn-meta text-slate-500">{dict.news.noFlash}</p>
               ) : (
                 <ul className="space-y-2.5">
                   {flashMini.map(f => (
@@ -164,7 +166,7 @@ export default function NewsPage({
               )}
             </RightRailPanel>
 
-            <RightRailPanel title="热门标签" accent>
+            <RightRailPanel title={dict.news.popularTags} accent>
               <div className="flex flex-wrap gap-1.5">
                 {popularTags.map(tag => (
                   <LocalizedLink

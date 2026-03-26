@@ -1,6 +1,7 @@
 {
   "nav": {
     "home": "Home",
+    "news": "News",
     "flash": "Flash News",
     "markets": "Markets",
     "usStock": "US Stocks",
@@ -16,7 +17,67 @@
     "moreFlash": "More Flash News",
     "latestNews": "Latest News & Analysis",
     "moreNews": "More News",
-    "marketQuotes": "Market Quotes"
+    "marketQuotes": "Market Quotes",
+    "channelNav": "Channel Index",
+    "newsOverview": "News Overview",
+    "editorsPicks": "Editor's Picks",
+    "marketWatch": "Market Watch",
+    "popularTags": "Popular Tags",
+    "moreTopics": "More Topics",
+    "noTags": "No tags available",
+    "all": "All",
+    "enterGuide": "Enter Guide →",
+    "guideDesc": "Learn the basics of US Stocks, Crypto, and Derivatives from scratch.",
+    "guideTitle": "Beginner's Guide",
+    "newestTitle": "Latest Reports",
+    "moreList": "More Reports"
+  },
+  "news": {
+    "todayFocus": "Today's Focus",
+    "newsList": "News List",
+    "flashSnippets": "Flash Snippets",
+    "noFlash": "No flash news available",
+    "popularTags": "Popular Tags",
+    "featuredReport": "Featured report",
+    "deepDive": "Deep dive",
+    "briefing": "Briefing",
+    "loadMore": "Load more archive entries",
+    "channelIndex": "Channel index",
+    "noCategoryNews": "No articles in this category."
+  },
+  "article": {
+    "deepDive": "Deep Dive",
+    "bullish": "Bullish",
+    "bearish": "Bearish",
+    "neutral": "Neutral",
+    "views": "Views",
+    "keyTakeaways": "Key Takeaways",
+    "imageSource": "Image Source:",
+    "imageDisclaimer": "Image for informational purposes only.",
+    "disclaimerTitle": "Disclaimer",
+    "disclaimerSelf": "This article is authored by YayaNews. It is for informational purposes only and does not constitute investment advice.",
+    "disclaimerOther": "This article is sourced from ",
+    "disclaimerSuffix": ". It is for informational purposes only and does not constitute investment advice.",
+    "tagsTitle": "Topics & Symbols",
+    "continueReading": "Continue Reading",
+    "prev": "Previous",
+    "next": "Next",
+    "relatedReading": "Related Reading",
+    "enterChannel": "Go to Channel",
+    "articleInfo": "Article Info",
+    "publishedAt": "Published At",
+    "channel": "Channel",
+    "viewCount": "View Count",
+    "relatedTickers": "Related Tickers",
+    "infoSource": "Source",
+    "relatedRecommendations": "Related Recommendations"
+  },
+  "tag": {
+    "noArticles": "No articles found for this tag.",
+    "featured": "Featured",
+    "moreRelated": "More Related Articles",
+    "tagTitle": "Tag",
+    "totalCount": "Total {count} related articles"
   },
   "footer": {
     "desc": "YayaNews is a leading professional financial news platform, delivering global financial updates, crypto dynamics, and in-depth analysis.",
@@ -31,6 +92,10 @@
     "source": "Source",
     "noData": "No data available",
     "search": "Search",
-    "searchPlaceholder": "Search news, topics, tags..."
+    "searchPlaceholder": "Search news, topics, tags...",
+    "all": "All",
+    "prevPage": "← Previous",
+    "nextPage": "Next →",
+    "pageIndicator": "Page {page} / {totalPages}"
   }
 }
