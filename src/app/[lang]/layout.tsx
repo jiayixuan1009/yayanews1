@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Newsreader, Public_Sans } from 'next/font/google';
 import { siteConfig } from '@/lib/types';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -16,27 +15,6 @@ const siteVerification: Metadata['verification'] | undefined =
         ...(bingSiteVer ? { other: { 'msvalidate.01': bingSiteVer } } : {}),
       }
     : undefined;
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-});
-
-const newsreader = Newsreader({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-newsreader',
-  weight: ['400', '600', '700'],
-  adjustFontFallback: false,
-});
-
-const publicSans = Public_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-public-sans',
-  weight: ['400', '500', '600', '700'],
-});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -93,8 +71,11 @@ export default function RootLayout({
   params: { lang: string };
 }) {
   return (
-    <html lang={params.lang} className={`${inter.variable} ${newsreader.variable} ${publicSans.variable}`}>
+    <html lang={params.lang}>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:wght@400;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link rel="dns-prefetch" href="https://api.coingecko.com" />
         <link rel="preconnect" href="https://api.coingecko.com" crossOrigin="anonymous" />
         <link rel="alternate" hrefLang="zh-CN" href={`${siteConfig.siteUrl}/zh`} />
