@@ -4,7 +4,7 @@ let pool: Pool | null = null;
 
 export function getDb(): Pool {
   if (!pool) {
-    const connectionString = process.env.DATABASE_URL || 'postgresql://yayanews:yayanews_master@127.0.0.1:5432/yayanews';
+    const connectionString = process.env.DATABASE_URL || 'postgresql://yayanews:Jia1009al@127.0.0.1:5432/yayanews';
     pool = new Pool({
       connectionString,
       max: 20,

@@ -11,7 +11,7 @@ import redis
 log = get_logger("db")
 
 TZ_CN = timezone(timedelta(hours=8))
-DB_URL = os.environ.get("DATABASE_URL", "postgresql://yayanews:yayanews_master@127.0.0.1:5432/yayanews")
+DB_URL = os.environ.get("DATABASE_URL", "postgresql://yayanews:Jia1009al@127.0.0.1:5432/yayanews")
 try:
     from pgvector.psycopg2 import register_vector
 except ImportError:

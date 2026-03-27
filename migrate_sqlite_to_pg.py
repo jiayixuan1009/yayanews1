@@ -8,7 +8,7 @@ def migrate():
     sqlite_conn = sqlite3.connect('data/yayanews.db')
     sqlite_conn.row_factory = sqlite3.Row
     
-    pg_url = os.environ.get("DATABASE_URL", "postgresql://yayanews:yayanews_master@127.0.0.1:5432/yayanews")
+    pg_url = os.environ.get("DATABASE_URL", "postgresql://yayanews:Jia1009al@127.0.0.1:5432/yayanews")
     pg_conn = psycopg2.connect(pg_url)
     
     tables = [
