@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -19,42 +19,35 @@ interface QueueItem {
   published_at?: string | null;
 }
 
-interface SourceActivity {
-  source: string;
-  last_seen: string;
-  count_24h: number;
-}
-
 const ARTICLE_STEPS = [
-  { key: 'collect', label: '选题采集', sub: 'Agent 1 · RSS + LLM' },
-  { key: 'generate', label: '内容生成', sub: 'Agent 2' },
-  { key: 'review', label: '质量审核', sub: 'Agent 3' },
-  { key: 'seo', label: 'SEO 优化', sub: 'Agent 4' },
-  { key: 'publish', label: '入库发布', sub: 'Agent 5 + Ping' },
+  { key: 'collect', label: '閫夐閲囬泦', sub: 'Agent 1 路 RSS + LLM' },
+  { key: 'generate', label: '鍐呭鐢熸垚', sub: 'Agent 2' },
+  { key: 'review', label: '璐ㄩ噺瀹℃牳', sub: 'Agent 3' },
+  { key: 'seo', label: 'SEO 浼樺寲', sub: 'Agent 4' },
+  { key: 'publish', label: '鍏ュ簱鍙戝竷', sub: 'Agent 5 + Ping' },
 ];
 
 const FLASH_STEPS = [
-  { key: 'c1', label: '多通道采集', sub: 'Finnhub / Marketaux / …' },
-  { key: 'c2', label: '翻译 & 去重', sub: 'LLM 批量' },
-  { key: 'c3', label: '入库', sub: 'flash_news' },
+  { key: 'c1', label: '澶氶€氶亾閲囬泦', sub: 'Finnhub / Marketaux / 鈥? },
+  { key: 'c2', label: '缈昏瘧 & 鍘婚噸', sub: 'LLM 鎵归噺' },
+  { key: 'c3', label: '鍏ュ簱', sub: 'flash_news' },
 ];
 
 function inferArticleStep(log: string): number {
   if (!log) return -1;
-  if (/Agent 5|发布完成|publish/i.test(log) && !/Pipeline 完成/.test(log.slice(-800))) return 4;
+  if (/Agent 5|鍙戝竷瀹屾垚|publish/i.test(log) && !/Pipeline 瀹屾垚/.test(log.slice(-800))) return 4;
   if (/Agent 4|SEO/i.test(log)) return 3;
-  if (/Agent 3|审核/i.test(log)) return 2;
-  if (/Agent 2|内容生成|Generating/i.test(log)) return 1;
-  if (/Agent 1|选题采集|采集完成/i.test(log)) return 0;
+  if (/Agent 3|瀹℃牳/i.test(log)) return 2;
+  if (/Agent 2|鍐呭鐢熸垚|Generating/i.test(log)) return 1;
+  if (/Agent 1|閫夐閲囬泦|閲囬泦瀹屾垚/i.test(log)) return 0;
   return -1;
 }
 
 export default function PipelinePage() {
   const [status, setStatus] = useState<PipelineStatus>({ running: false, pid: null, log: '' });
-  const [queues, setQueues] = useState<{ pending: QueueItem[]; published: QueueItem[]; sources: SourceActivity[] }>({
+  const [queues, setQueues] = useState<{ pending: QueueItem[]; published: QueueItem[] }>({
     pending: [],
     published: [],
-    sources: [],
   });
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<'all' | 'articles' | 'flash'>('all');
@@ -76,11 +69,10 @@ export default function PipelinePage() {
   const fetchQueues = useCallback(() => {
     adminFetch('/api/admin/pipeline-queues')
       .then(r => r.json())
-      .then((data: { pending?: QueueItem[]; published?: QueueItem[]; sources?: SourceActivity[] }) => {
+      .then((data: { pending?: QueueItem[]; published?: QueueItem[] }) => {
         setQueues({
           pending: data.pending || [],
           published: data.published || [],
-          sources: data.sources || [],
         });
       })
       .catch(() => {});
@@ -122,7 +114,7 @@ export default function PipelinePage() {
   }
 
   async function handleStop() {
-    if (!confirm('确定要中断 Pipeline？')) return;
+    if (!confirm('纭畾瑕佷腑鏂?Pipeline锛?)) return;
     setLoading(true);
     try {
       await adminFetch('/api/admin/pipeline?action=stop', { method: 'POST' });
@@ -132,41 +124,16 @@ export default function PipelinePage() {
     }
   }
 
-  const articleStep = status.running ? inferArticleStep(status.log) : -1;
-  const flashRunning = status.running && /快讯|flash|Flash|Dispatching \d+ flash/i.test(status.log);
-  const isPaused = !status.running && status.log?.includes('[已暂停]');
-  const isOffline = !status.running && status.log?.includes('警告: 离线超过');
+  const articleStep = status.running && (mode === 'all' || mode === 'articles') ? inferArticleStep(status.log) : -1;
+  const flashRunning = status.running && (mode === 'all' || mode === 'flash') && /蹇|flash|Flash/i.test(status.log);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">内容生产 Pipeline</h2>
-        
-        {/* -- First Principles: Definitive Control Switch -- */}
-        <div className="flex items-center gap-3 bg-slate-900 border border-slate-700 px-4 py-2 rounded-lg">
-          <span className="text-xs font-medium text-slate-400">总开关状态</span>
-          <button
-            onClick={status.running ? handleStop : handleStart}
-            disabled={loading || isOffline}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              status.running ? 'bg-primary-500' : 'bg-slate-600'
-            } ${loading || isOffline ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                status.running ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
-          <span className={`text-sm font-bold ${status.running ? 'text-primary-400 animate-pulse' : isOffline ? 'text-red-500' : 'text-amber-500'}`}>
-            {status.running ? '生产中' : isOffline ? '离线异常' : '已中断'}
-          </span>
-        </div>
-      </div>
+      <h2 className="text-xl font-bold text-white">鍐呭鐢熶骇 Pipeline</h2>
 
-      {/* —— 流程可视化 —— */}
+      {/* 鈥斺€?娴佺▼鍙鍖?鈥斺€?*/}
       <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-6">
-        <h3 className="text-sm font-semibold text-white">文章生产线（顺序执行）</h3>
+        <h3 className="text-sm font-semibold text-white">鏂囩珷鐢熶骇绾匡紙椤哄簭鎵ц锛?/h3>
         <div className="flex flex-wrap items-stretch gap-2 md:gap-0 md:justify-between">
           {ARTICLE_STEPS.map((s, i) => {
             const active = articleStep === i;
@@ -184,18 +151,18 @@ export default function PipelinePage() {
                 >
                   <div className="text-xs font-semibold text-white">{s.label}</div>
                   <div className="mt-0.5 text-[10px] text-slate-500 leading-tight">{s.sub}</div>
-                  {active && <div className="mt-1 text-[10px] text-primary-400 animate-pulse">进行中…</div>}
-                  {done && !active && <div className="mt-1 text-[10px] text-emerald-600">✓</div>}
+                  {active && <div className="mt-1 text-[10px] text-primary-400 animate-pulse">杩涜涓€?/div>}
+                  {done && !active && <div className="mt-1 text-[10px] text-emerald-600">鉁?/div>}
                 </div>
                 {i < ARTICLE_STEPS.length - 1 && (
-                  <div className="hidden md:block w-2 shrink-0 text-slate-600 text-center">→</div>
+                  <div className="hidden md:block w-2 shrink-0 text-slate-600 text-center">鈫?/div>
                 )}
               </div>
             );
           })}
         </div>
 
-        <h3 className="text-sm font-semibold text-white pt-2 border-t border-slate-800">快讯生产线（通道并发 → 翻译）</h3>
+        <h3 className="text-sm font-semibold text-white pt-2 border-t border-slate-800">蹇鐢熶骇绾匡紙閫氶亾骞跺彂 鈫?缈昏瘧锛?/h3>
         <div className="flex flex-wrap gap-3">
           {FLASH_STEPS.map((s, i) => {
             const active = flashRunning && i === 1;
@@ -213,53 +180,20 @@ export default function PipelinePage() {
             );
           })}
         </div>
-
-        <h3 className="text-sm font-semibold text-white pt-2 border-t border-slate-800 mt-6">数据源实时监控 (Active Channels)</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {queues.sources.length === 0 ? (
-            <div className="col-span-full py-2 text-xs text-slate-500 text-center">暂无数据源活动记录</div>
-          ) : (
-            queues.sources.map(s => {
-              const secondsAgo = (Date.now() - new Date(s.last_seen).getTime()) / 1000;
-              const isBlinking = secondsAgo < 15; // Pulse if updated within the last 15 seconds!
-              return (
-                <div
-                  key={s.source}
-                  className={`relative overflow-hidden rounded-lg border px-3 py-2 transition-all ${
-                    isBlinking
-                      ? 'border-emerald-500 bg-emerald-950/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
-                      : 'border-slate-700 bg-slate-800/40'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[11px] font-bold tracking-wide uppercase ${isBlinking ? 'text-emerald-400' : 'text-slate-300'}`}>
-                      {s.source}
-                    </span>
-                    {isBlinking && <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />}
-                  </div>
-                  <div className="mt-1.5 flex items-center justify-between text-[10px]">
-                    <span className="text-slate-500">24H: <span className="text-slate-400">{s.count_24h}</span></span>
-                    <span className={isBlinking ? 'text-emerald-500/80' : 'text-slate-600'}>
-                      {isBlinking ? 'Acquiring...' : `${Math.floor(secondsAgo / 60)}m ago`}
-                    </span>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+        <p className="text-[11px] text-slate-500">
+          鏂囩珷闃舵鏍规嵁褰撳墠鏃ュ織鍏抽敭瀛楅珮浜紱鏈繍琛屾椂鍏ㄩ儴鏄剧ず涓哄緟鏈恒€傚緟澶勭悊闃熷垪涓哄簱鍐?<code className="text-slate-400">draft/review</code> 鐘舵€併€?        </p>
       </div>
 
-      {/* —— 双队列 —— */}
+      {/* 鈥斺€?鍙岄槦鍒?鈥斺€?*/}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="rounded-xl border border-amber-900/40 bg-slate-900/60 p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-amber-200">待处理（草稿 / 待审）</h3>
-            <span className="text-xs text-slate-500">{queues.pending.length} 条</span>
+            <h3 className="text-sm font-semibold text-amber-200">寰呭鐞嗭紙鑽夌 / 寰呭锛?/h3>
+            <span className="text-xs text-slate-500">{queues.pending.length} 鏉?/span>
           </div>
           <ul className="max-h-64 overflow-y-auto space-y-2 text-sm">
             {queues.pending.length === 0 ? (
-              <li className="text-slate-500 text-xs py-4 text-center">暂无 — Pipeline 通常直接发 published</li>
+              <li className="text-slate-500 text-xs py-4 text-center">鏆傛棤 鈥?Pipeline 閫氬父鐩存帴鍙?published</li>
             ) : (
               queues.pending.map(a => (
                 <li key={a.id} className="flex justify-between gap-2 border-b border-slate-800/80 pb-2">
@@ -269,11 +203,13 @@ export default function PipelinePage() {
               ))
             )}
           </ul>
+          <Link href="/admin/articles" className="mt-3 inline-block text-xs text-primary-400 hover:text-primary-300">
+            鏂囩珷绠＄悊 鈫?          </Link>
         </div>
         <div className="rounded-xl border border-emerald-900/40 bg-slate-900/60 p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-emerald-300">已发布（最近）</h3>
-            <span className="text-xs text-slate-500">{queues.published.length} 条</span>
+            <h3 className="text-sm font-semibold text-emerald-300">宸插彂甯冿紙鏈€杩戯級</h3>
+            <span className="text-xs text-slate-500">{queues.published.length} 鏉?/span>
           </div>
           <ul className="max-h-64 overflow-y-auto space-y-2 text-sm">
             {queues.published.map(a => (
@@ -292,25 +228,33 @@ export default function PipelinePage() {
         </div>
       </div>
 
+      {/* Status */}
+      <div className="flex items-center gap-4">
+        <span className={`h-3 w-3 rounded-full ${status.running ? 'bg-green-500 animate-pulse' : 'bg-slate-600'}`} />
+        <span className="text-sm text-slate-300">
+          {status.running ? `杩愯涓?(PID: ${status.pid})` : '宸插仠姝?}
+        </span>
+      </div>
+
       <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-4">
-        <h3 className="text-sm font-semibold text-white">运行时配置 (Runtime Config)</h3>
+        <h3 className="text-sm font-semibold text-white">鍚姩鍙傛暟</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs text-slate-400 mb-1.5">生产模式</label>
+            <label className="block text-xs text-slate-400 mb-1.5">鐢熶骇妯″紡</label>
             <select
               value={mode}
               onChange={e => setMode(e.target.value as typeof mode)}
               disabled={status.running}
               className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white focus:border-primary-500 focus:outline-none disabled:opacity-50"
             >
-              <option value="all">文章 + 快讯</option>
-              <option value="articles">仅文章出稿</option>
-              <option value="flash">仅快讯采集</option>
+              <option value="all">鏂囩珷 + 蹇</option>
+              <option value="articles">浠呮枃绔?/option>
+              <option value="flash">浠呭揩璁?/option>
             </select>
           </div>
           {mode !== 'flash' && (
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">文章单次投递量</label>
+              <label className="block text-xs text-slate-400 mb-1.5">鏂囩珷鏁伴噺</label>
               <input
                 type="number"
                 min={1}
@@ -318,13 +262,13 @@ export default function PipelinePage() {
                 value={articles}
                 onChange={e => setArticles(e.target.value)}
                 disabled={status.running}
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white disabled:opacity-50"
+                className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white"
               />
             </div>
           )}
           {mode !== 'articles' && (
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5">快讯采集条数</label>
+              <label className="block text-xs text-slate-400 mb-1.5">蹇鏁伴噺</label>
               <input
                 type="number"
                 min={1}
@@ -332,31 +276,56 @@ export default function PipelinePage() {
                 value={flash}
                 onChange={e => setFlash(e.target.value)}
                 disabled={status.running}
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white disabled:opacity-50"
+                className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white"
               />
             </div>
           )}
         </div>
-        <p className="text-xs text-slate-500 mt-2">注：上述配置会在下次点击【总开关】启动时，写入后台 PM2 守护进程生效。</p>
+        <div className="flex gap-3 pt-2">
+          {!status.running ? (
+            <button
+              onClick={handleStart}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
+            >
+              鍚姩 Pipeline
+            </button>
+          ) : (
+            <button
+              onClick={handleStop}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              涓柇 Pipeline
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              fetchStatus();
+              fetchQueues();
+            }}
+            className="rounded-lg border border-slate-700 px-4 py-2.5 text-sm text-slate-400 hover:bg-slate-800"
+          >
+            鍒锋柊
+          </button>
+        </div>
       </div>
 
       <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-white">守护进程实时心跳 (Daemon Heartbeat)</h3>
+          <h3 className="text-sm font-semibold text-white">杩愯鏃ュ織</h3>
           {status.running && (
             <span className="flex items-center gap-1.5 text-xs text-green-400">
               <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-              后台指令正常侦听中
-            </span>
+              瀹炴椂鏇存柊涓?            </span>
           )}
         </div>
         <pre
           ref={logRef}
-          className={`h-80 overflow-y-auto rounded-lg bg-slate-950 border p-4 text-xs font-mono whitespace-pre-wrap ${
-            isPaused ? 'border-amber-500/50 text-amber-200' : isOffline ? 'border-red-500/50 text-red-400' : 'border-emerald-500/50 text-emerald-500'
-          }`}
+          className="h-80 overflow-y-auto rounded-lg bg-slate-950 border border-slate-800 p-4 text-xs text-slate-400 font-mono whitespace-pre-wrap"
         >
-          {status.log || '正在连接守护进程...'}
+          {status.log || '鏆傛棤鏃ュ織杈撳嚭銆傜偣鍑汇€屽惎鍔?Pipeline銆嶅紑濮嬪唴瀹圭敓浜с€?}
         </pre>
       </div>
     </div>
